@@ -1,0 +1,113 @@
+#!/bin/sh
+
+# By a404m
+
+show_usage(){
+	echo "Usage: pass_gen [OPTION]..."
+	echo
+	echo "Generates a random password depending on OPTIONs"
+	echo
+	echo "Options:"
+	echo "  -h|--help		to print this message and exit"
+	echo "  -l|--length [length]	to determine length of password"
+	echo "  -m|--alnum		all letters and digits"
+	echo "  -a|--aplha		all letters"
+	echo "  -d|--digit		all digits"
+	echo "  -b|--blank		all horizontal whitespaces"
+	echo "  -g|--graph		all printable charaters, not including space"
+	echo "  -l|--lower		all lower case letters"
+	echo "  -p|--print		all printable characters, including space"
+	echo "  -t|--punct		all punctuation characters"
+	echo "  -s|--space		all horizontal or vertical whitesapce"
+	echo "  -u|--upper		all upper case letters"
+	echo "  -x|--xdigit		all hexadecimal digits"
+	echo "  -c|--custom [CHARS]	all characters used in [CHARS]"
+	echo "  -v|--version		show version and exit"
+}
+
+show_version(){
+	echo "Version: v0.0.1"
+}
+
+pass_gen(){
+	local len=8
+	local filter=''
+	numRegx='^[0-9]+$'
+	while [ ! -z "$1" ]; do
+		case "$1" in
+			-h|--help)
+				show_usage
+				exit 0
+			;;
+			-l|--length)
+				shift
+				if ! [[ $1 =~ $numRegx ]]; then
+					echo "Incorrrect usage:"
+					echo "You should provide length as a number"
+					exit 1
+				else
+					len="$1"
+				fi
+			;;
+			-m|--alnum)
+				filter="$filter[:alnum:]"
+			;;
+			-a|--alpha)
+				filter="$filter[:alpha:]"
+			;;
+			-d|--digit)
+				filter="$filter[:digit:]"
+			;;
+			-b|--blank)
+				filter="$filter[:blank:]"
+			;;
+			-g|--graph)
+				filter="$filter[:graph:]"
+			;;
+			-l|--lower)
+				filter="$filter[:lower:]"
+			;;
+			-p|--print)
+				filter="$filter[:print:]"
+			;;
+			-t|--punct)
+				filter="$filter[:punct:]"
+			;;
+			-s|--space)
+				filter="$filter[:space:]"
+			;;
+			-u|--upper)
+				filter="$filter[:upper:]"
+			;;
+			-x|--xdigit)
+				filter="$filter[:xdigit:]"
+			;;
+			-c|--custom)
+				shift
+				if [ -z $1 ]; then
+					echo "Incorrrect usage:"
+					echo "You should provide custom characters"
+					exit 1
+				else
+					filter="$filter$1"
+				fi
+			;;
+			-v|--version)
+				show_version
+				exit 0
+			;;
+			*)
+				echo "Incorrrect usage"
+				show_usage
+				exit 1
+		esac
+		shift
+	done
+	if [ ! -n "$filter" ]; then
+		filter='[:graph:]'
+	fi
+	tr -cd "$filter" < /dev/urandom | head -c $len
+	echo
+}
+
+pass_gen "$@"
